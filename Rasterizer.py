@@ -5,7 +5,7 @@ import random
 
 
 width = 1920
-height = 1080
+height = 1920
 
 # width = 500
 # height = 620
@@ -17,11 +17,27 @@ rend.fragmentShader = shaders.fragmentShader
 
 rend.glLoadModel(filename="model.obj",
                  textureName= "model.bmp",
-                 translate=(width/2,height/4,0), 
+                 translate=(width/4,height/4,0), 
+                 rotate= (0,270,0),
+                 scale=(350,350,350))
+
+rend.glLoadModel(filename="model.obj",
+                 textureName= "model.bmp",
+                 translate=(width/4,3*(height/4),0), 
+                 rotate= (0,90,0),
+                 scale=(350,350,350))
+
+rend.glLoadModel(filename="model.obj",
+                 textureName= "model.bmp",
+                 translate=(3*(width/4), 3*(height/4), 0), 
+                 rotate= (0,0,0),
+                 scale=(350,350,350))
+
+rend.glLoadModel(filename="model.obj",
+                 textureName= "model.bmp",
+                 translate=(3*(width/4),height/4,0), 
                  rotate= (0,180,0),
-                 scale=(300,300,300))
-
-
+                 scale=(350,350,350))
 
 rend.glRender()
 

@@ -346,7 +346,6 @@ class Renderer(object):
                 vt0 = model.texcoords[face[0][1]-1]
                 vt1 = model.texcoords[face[1][1]-1]
                 vt2 = model.texcoords[face[2][1]-1]
-                print(face[1][1]-1)
                 if vertCount == 4:
                     vt3 = model.texcoords[face[3][1]-1]
 
