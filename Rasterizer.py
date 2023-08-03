@@ -15,15 +15,14 @@ rend = Renderer(width,height)
 rend.vertexShader = shaders.vertexShader
 rend.fragmentShader = shaders.fragmentShader
 
-rend.glLoadModel("P2.obj", 
+rend.glLoadModel(filename="model.obj",
+                 textureName= "model.bmp",
                  translate=(width/2,height/4,0), 
                  rotate= (0,180,0),
-                 scale=(500,500,500))
+                 scale=(300,300,300))
+
+
 
 rend.glRender()
-
-# triangle = [(100,100),(450,180),(250,500)]
-
-# rend.glTriangle_bc(triangle[0],triangle[1],triangle[2])
 
 rend.glFinish("output.bmp")

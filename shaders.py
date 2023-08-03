@@ -1,6 +1,5 @@
 import meth as metha
 
-import random
 
 def vertexShader(vertex, **kwargs):
     modelMatrix = kwargs["modelMatrix"]
@@ -20,5 +19,11 @@ def vertexShader(vertex, **kwargs):
     return vt
 
 def fragmentShader(**kwargs):
-    color = (random.random(),random.random(),random.random())
+    texCoords = kwargs["texCoords"]
+    texture = kwargs["texture"]
+
+    if texture != None:
+        color = texture.getColor(texCoords[0],texCoords[1])
+    else:
+        color =  (1,1,1)
     return color
