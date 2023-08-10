@@ -15,29 +15,32 @@ rend = Renderer(width,height)
 rend.vertexShader = shaders.vertexShader
 rend.fragmentShader = shaders.fragmentShader
 
-rend.glLoadModel(filename="model.obj",
-                 textureName= "model.bmp",
-                 translate=(width/4,height/4,0), 
-                 rotate= (0,270,0),
-                 scale=(350,350,350))
+rend.glLookAt(camPos=(0,10,0),
+              eyePos=(0,0,-5))
 
 rend.glLoadModel(filename="model.obj",
                  textureName= "model.bmp",
-                 translate=(width/4,3*(height/4),0), 
-                 rotate= (0,90,0),
-                 scale=(350,350,350))
-
-rend.glLoadModel(filename="model.obj",
-                 textureName= "model.bmp",
-                 translate=(3*(width/4), 3*(height/4), 0), 
+                 translate=(0,0,-5), 
                  rotate= (0,0,0),
-                 scale=(350,350,350))
+                 scale=(1.5,1.5,1.5))
 
-rend.glLoadModel(filename="model.obj",
-                 textureName= "model.bmp",
-                 translate=(3*(width/4),height/4,0), 
-                 rotate= (0,180,0),
-                 scale=(350,350,350))
+# rend.glLoadModel(filename="model.obj",
+#                  textureName= "model.bmp",
+#                  translate=(width/4,3*(height/4),0), 
+#                  rotate= (0,90,0),
+#                  scale=(350,350,350))
+
+# rend.glLoadModel(filename="model.obj",
+#                  textureName= "model.bmp",
+#                  translate=(3*(width/4), 3*(height/4), 0), 
+#                  rotate= (0,0,0),
+#                  scale=(350,350,350))
+
+# rend.glLoadModel(filename="model.obj",
+#                  textureName= "model.bmp",
+#                  translate=(3*(width/4),height/4,0), 
+#                  rotate= (0,180,0),
+#                  scale=(350,350,350))
 
 rend.glRender()
 

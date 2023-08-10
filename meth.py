@@ -64,3 +64,55 @@ def barycentrinCoords(A,B,C,P):
         return u,v,w
     else:
         return None
+
+def getMatrixMinor(matrix,i,j):
+    return [row[:j] + row[j+1:] for row in (matrix[:i]+matrix[i+1:])] #minor matrix
+
+def matrixDeterm(matrix):
+    if len(matrix) == 2: #case for 2x2 matrix
+        return matrix[0][0]*matrix[1][1]-matrix[0][1]*matrix[1][0]
+    determinant = 0
+    for c in range(len(matrix)):
+        determinant += ((-1)**c)*matrix[0][c]*matrixDeterm(getMatrixMinor(matrix,0,c))
+    return determinant
+
+def invMatrix(mx):
+    det = matrixDeterm(mx)
+    if(det==0):
+        print('Determinant is zero')
+        return
+    if len(mx) == 2: #case for 2x2 matrix 
+        return [[mx[1][1]/det, -1*mx[0][1]/det],
+                [-1*mx[1][0]/det, mx[0][0]/det]]
+    cofactors = []
+    for i in range(len(mx)):
+        cofactRow = []
+        for j in range(len(mx)):
+            minorValue = getMatrixMinor(mx,i,j)
+            cofactRow.append(((-1)**(i+j)) * matrixDeterm(minorValue))
+        cofactors.append(cofactRow)
+        
+    inverse = list(map(list,zip(*cofactors))) #gets the transpose of the matrix
+    for i in range(len(inverse)):
+        for j in range(len(inverse)):
+            inverse[i][j] = inverse[i][j]/det
+    return inverse
+
+def substractionVectors(a,b):
+    return (a[0]-b[0], a[1]-b[1], a[2]-b[2])
+
+def prodCrossV(a,b):
+    cross_product = [a[1] * b[2] - a[2] * b[1],
+                     a[2] * b[0] - a[0] * b[2],
+                     a[0] * b[1] - a[1] * b[0]]
+    return cross_product
+
+def normalizeVector(vector):
+    vectorList = list(vector)
+    magnitude = math.sqrt(sum(e ** 2 for e in vectorList))
+    if magnitude == 0: #error if magnitude is 0
+        print("Unable to normalize")
+    
+    normVector = [e / magnitude for e in vectorList]
+    return tuple(normVector)
+     
