@@ -116,3 +116,6 @@ def normalizeVector(vector):
     normVector = [e / magnitude for e in vectorList]
     return tuple(normVector)
      
+def dotProd(v1, v2):
+    return sum(x*y for x, y in zip(v1, v2))
+

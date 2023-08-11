@@ -29,3 +29,20 @@ def fragmentShader(**kwargs):
     else:
         color =  (1,1,1)
     return color
+
+def flatShader(**kwargs):
+    dLight = kwargs["dLight"]
+    normal = kwargs["triangleNormal"]
+
+    dLight = list(dLight)
+    for e in range(len(dLight)):
+        dLight[e] = -1 * dLight[e]
+
+    intensity = metha.dotProd(normal,dLight)
+
+    color = (intensity,intensity,intensity)
+
+    if intensity > 0:
+        return color
+    else:
+        return (0,0,0)
