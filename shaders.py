@@ -143,25 +143,64 @@ def negativeShader(**kwargs):
     else:
         return (1,1,1) 
 
-def pixelationShader(**kwargs):
+def experimentshader(**kwargs):
+    dLight = kwargs["dLight"]
+    nA,nB,nC = kwargs["normals"]
+    tA,tB,tC = kwargs["texCoords"]
     texture = kwargs["texture"]
-    tA, tB, tC = kwargs["texCoords"]
-    u, v, w = kwargs["bCoords"]
-    
+    u,v,w = kwargs["bCoords"]
+
+    b = 1.0
+    g = 1.0
+    r = 1.0
+
     if texture != None:
-        tU = u * tA[0] + v * tB[0] + w * tC[0]
-        tV = u * tA[1] + v * tB[1] + w * tC[1]
-        
-        factor=30
-        
-        pixelSizeX= 1.0/factor
-        pixelSizeY= 1.0/factor
-        
-        blockX = int(tU/pixelSizeX)*pixelSizeX
-        blockY = int(tV/pixelSizeY)*pixelSizeY
-        
-        color = texture.getColor(blockX, blockY)
-        
-        return color
+        tU = u*tA[0] + v*tB[0] + w*tC[0]
+        tV = u*tA[1] + v*tB[1] + w*tC[1]
+
+        textureColor = texture.getColor(tU,tV)
+        b = textureColor[2]
+        g = textureColor[1]
+        r = textureColor[0]
+
+    normal = [u*nA[0] + v*nB[0] + w*nC[0],
+              u*nA[1] + v*nB[1] + w*nC[1],
+              u*nA[2] + v*nB[2] + w*nC[2],]
+    
+    dLight = list(dLight)
+    for e in range(len(dLight)):
+        dLight[e] = -1 * dLight[e]
+
+    intensity = metha.dotProd(normal,dLight)
+    
+    if intensity < 0.3:
+        b = 0.890
+        g = 0.090
+        r = 0.039
+    if intensity > 0.3 and intensity < 0.35:
+        b = 0.627
+        g = 0.839
+        r = 0.024
+    if intensity > 0.35 and intensity < 0.65:
+        b = 0.435
+        g = 0.278
+        r = 0.937
+    if intensity > 0.65 and intensity < 0.7:
+        b = 0.627
+        g = 0.839
+        r = 0.024
+    if intensity > 0.7 and intensity < 0.95:
+        b = 0.400
+        g = 0.819
+        r = 1.0
+    if intensity > 0.95:
+        b = 0.572
+        g = 0.929
+        r = 0.850
+
+    
+
+    if intensity > 0:
+        return r,g,b
     else:
-        return [0,0,0] 
+        return (0,0,0)
