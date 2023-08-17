@@ -32,7 +32,20 @@ def fragmentShader(**kwargs):
 
 def flatShader(**kwargs):
     dLight = kwargs["dLight"]
-    normal = kwargs["triangleNormal"]
+    normal = kwargs["normals"]
+    texCoords = kwargs["texCoords"]
+    texture = kwargs["texture"]
+
+    b = 1.0
+    g = 1.0
+    r = 1.0
+
+    if texture != None:
+        textureColor = texture.getColor(texCoords[0],texCoords[1])
+        b = textureColor[2]
+        g = textureColor[1]
+        r = textureColor[0]
+
 
     dLight = list(dLight)
     for e in range(len(dLight)):
@@ -40,9 +53,115 @@ def flatShader(**kwargs):
 
     intensity = metha.dotProd(normal,dLight)
 
-    color = (intensity,intensity,intensity)
+    b *= intensity
+    g *= intensity
+    r *= intensity
 
     if intensity > 0:
-        return color
+        return r,g,b
     else:
         return (0,0,0)
+    
+def gouradShader(**kwargs):
+    dLight = kwargs["dLight"]
+    nA,nB,nC = kwargs["normals"]
+    tA,tB,tC = kwargs["texCoords"]
+    texture = kwargs["texture"]
+    u,v,w = kwargs["bCoords"]
+
+    b = 1.0
+    g = 1.0
+    r = 1.0
+
+    if texture != None:
+        tU = u*tA[0] + v*tB[0] + w*tC[0]
+        tV = u*tA[1] + v*tB[1] + w*tC[1]
+
+        textureColor = texture.getColor(tU,tV)
+        b = textureColor[2]
+        g = textureColor[1]
+        r = textureColor[0]
+
+    normal = [u*nA[0] + v*nB[0] + w*nC[0],
+              u*nA[1] + v*nB[1] + w*nC[1],
+              u*nA[2] + v*nB[2] + w*nC[2],]
+    
+    dLight = list(dLight)
+    for e in range(len(dLight)):
+        dLight[e] = -1 * dLight[e]
+
+    intensity = metha.dotProd(normal,dLight)
+    
+    b *= intensity
+    g *= intensity
+    r *= intensity
+
+    if intensity > 0:
+        return r,g,b
+    else:
+        return (0,0,0)
+    
+def negativeShader(**kwargs):
+    dLight = kwargs["dLight"]
+    nA,nB,nC = kwargs["normals"]
+    tA,tB,tC = kwargs["texCoords"]
+    texture = kwargs["texture"]
+    u,v,w = kwargs["bCoords"]
+
+    b = 1.0
+    g = 1.0
+    r = 1.0
+
+    if texture != None:
+        tU = u*tA[0] + v*tB[0] + w*tC[0]
+        tV = u*tA[1] + v*tB[1] + w*tC[1]
+
+        textureColor = texture.getColor(tU,tV)
+        b = textureColor[2]
+        g = textureColor[1]
+        r = textureColor[0]
+
+    normal = [u*nA[0] + v*nB[0] + w*nC[0],
+              u*nA[1] + v*nB[1] + w*nC[1],
+              u*nA[2] + v*nB[2] + w*nC[2],]
+    
+    dLight = list(dLight)
+    for e in range(len(dLight)):
+        dLight[e] = -1 * dLight[e]
+
+    intensity = metha.dotProd(normal,dLight)
+    
+    b *= intensity
+    g *= intensity
+    r *= intensity
+
+    if intensity > 0:
+        r = 1.0 - r
+        g = 1.0 - g
+        b = 1.0 - b
+        return r,g,b
+    else:
+        return (1,1,1) 
+
+def pixelationShader(**kwargs):
+    texture = kwargs["texture"]
+    tA, tB, tC = kwargs["texCoords"]
+    u, v, w = kwargs["bCoords"]
+    
+    if texture != None:
+        tU = u * tA[0] + v * tB[0] + w * tC[0]
+        tV = u * tA[1] + v * tB[1] + w * tC[1]
+        
+        factor=30
+        
+        pixelSizeX= 1.0/factor
+        pixelSizeY= 1.0/factor
+        
+        blockX = int(tU/pixelSizeX)*pixelSizeX
+        blockY = int(tV/pixelSizeY)*pixelSizeY
+        
+        color = texture.getColor(blockX, blockY)
+        
+        return color
+    else:
+        return [0,0,0] 

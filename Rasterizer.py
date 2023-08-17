@@ -13,12 +13,10 @@ height = 1920
 rend = Renderer(width,height)
 
 rend.vertexShader = shaders.vertexShader
-rend.fragmentShader = shaders.flatShader
+rend.fragmentShader = shaders.gouradShader
 
-
-#mediumshot
-# rend.glLookAt(camPos=(0,0,0),
-#               eyePos=(0,0,-5))
+rend.glClearColor(0.5,0.5,0.7)
+rend.glClear()
 
 rend.glLoadModel(filename="model.obj",
                  textureName= "model.bmp",
@@ -28,3 +26,5 @@ rend.glLoadModel(filename="model.obj",
 
 rend.glRender()
 rend.glFinish("./results/output.bmp")
+
+#56 min class 04-08 gpc
