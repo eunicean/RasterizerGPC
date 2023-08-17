@@ -13,7 +13,7 @@ height = 1920
 rend = Renderer(width,height)
 
 rend.vertexShader = shaders.vertexShader
-rend.fragmentShader = shaders.negativeShader
+rend.fragmentShader = shaders.distortionshader
 
 rend.glClearColor(0.5,0.5,0.7)
 rend.glClear()
@@ -25,6 +25,6 @@ rend.glLoadModel(filename="model.obj",
                  scale=(1.5,1.5,1.5))
 
 rend.glRender()
-rend.glFinish("./results/negativeshader.bmp")
+rend.glFinish("./results/distortionshader.bmp")
 
 #56 min class 04-08 gpc

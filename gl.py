@@ -71,7 +71,7 @@ class Renderer(object):
         self.glCamMatrix()
         self.glProjectionMatrix()
 
-        self.directionalLight = (0,1,-1) #apuntando hacia la derecha
+        self.directionalLight = (1,1,-1) #apuntando hacia la derecha
 
     def glAddVertices(self, vertices):
         for vert in vertices:
