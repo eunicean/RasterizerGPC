@@ -140,6 +140,9 @@ def negativeShader(**kwargs):
         r = 1.0 - r
         g = 1.0 - g
         b = 1.0 - b
+        r = max(0.0, min(1.0, r))
+        g = max(0.0, min(1.0, g))
+        b = max(0.0, min(1.0, b))
         return r,g,b
     else:
         return (1,1,1) 

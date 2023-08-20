@@ -57,13 +57,13 @@ class Renderer(object):
 
         self.glColor(1,1,1)
 
+        self.objects = []
+
         self.vertexShader = None
         self.fragmentShader = None
 
         self.primitiveType = TRIANGLES
         self.vertexBuffer = []
-
-        self.objects = []
 
         self.activeTexture = None
 
@@ -71,11 +71,8 @@ class Renderer(object):
         self.glCamMatrix()
         self.glProjectionMatrix()
 
-        self.directionalLight = (1,1,-1) #apuntando hacia la derecha
+        self.directionalLight = (0,1,-1) #apuntando hacia la derecha
 
-    def glAddVertices(self, vertices):
-        for vert in vertices:
-            self.vertexBuffer.append(vert)
 
     def glPrimitiveAssembly(self,tVerts, tTexCoords, tNormals):
         primitives = [ ]
@@ -184,10 +181,6 @@ class Renderer(object):
         maxX = round(max(A[0],B[0],C[0]))
         minY = round(min(A[1],B[1],C[1]))
         maxY = round(max(A[1],B[1],C[1]))
-
-        colorA = (1,0,0)
-        colorB = (0,1,0)
-        colorC = (0,0,1)
 
         for x in range(minX,maxX + 1):
             for y in range(minY,maxY+1):
@@ -375,24 +368,14 @@ class Renderer(object):
         for model in self.objects:
             self.activeTexture = model.texture
             mMat = self.glModelMatrix(model.translate,model.rotate, model.scale)
-
             for face in model.faces:
                 vertCount = len(face)
-
                 v0 = model.vertices[face[0][0]-1]
                 v1 = model.vertices[face[1][0]-1]
                 v2 = model.vertices[face[2][0]-1]
 
                 if vertCount == 4:
                     v3 = model.vertices[face[3][0]-1]
-                
-                # triangleNormal0  = metha.prodCrossV(metha.substractionVectors(v1,v0),metha.substractionVectors(v2,v0))  #DUDA
-                # triangleNormal0 = metha.normalizeVector(triangleNormal0)
-                # normals.append(triangleNormal0)
-                # if vertCount == 4:
-                #     triangleNormal1  = metha.prodCrossV(metha.substractionVectors(v2,v0),metha.substractionVectors(v3,v0))  #DUDA
-                #     triangleNormal1 = metha.normalizeVector(triangleNormal1)
-                #     normals.append(triangleNormal1)
 
                 if self.vertexShader:
                     v0 = self.vertexShader(v0, 
@@ -417,6 +400,7 @@ class Renderer(object):
                                            projectionMatrix = self.projectionMatrix,
                                            vpMatrix = self.vpMatrix)
                 
+                #agregar cada vertice transformado al listado de vertices
                 transformedVerts.append(v0)
                 transformedVerts.append(v1)
                 transformedVerts.append(v2)
@@ -425,16 +409,19 @@ class Renderer(object):
                     transformedVerts.append(v2)
                     transformedVerts.append(v3)
 
+                #Obtenemos las coordenadas de textura de la cara actual
                 vt0 = model.texcoords[face[0][1]-1]
                 vt1 = model.texcoords[face[1][1]-1]
                 vt2 = model.texcoords[face[2][1]-1]
                 if vertCount == 4:
                     vt3 = model.texcoords[face[3][1]-1]
-
+                #Agregamos las coordenadas de textura al listado de coordenadas de textura.
                 texCoords.append(vt0)
                 texCoords.append(vt1)
                 texCoords.append(vt2)
                 if vertCount == 4:
+                    texCoords.append(vt0)
+                    texCoords.append(vt2)
                     texCoords.append(vt3)
 
                 vn0 = model.normals[face[0][2]-1]
@@ -447,13 +434,15 @@ class Renderer(object):
                 normals.append(vn1)
                 normals.append(vn2)
                 if vertCount == 4:
+                    normals.append(vn0)
+                    normals.append(vn2)
                     normals.append(vn3)
         
         primitives = self.glPrimitiveAssembly(transformedVerts,texCoords, normals)
 
         for prim in primitives:
             if self.primitiveType == TRIANGLES:
-                self.glTriangle_bc(prim[0],prim[1],prim[2],)
+                self.glTriangle_bc(prim[0],prim[1],prim[2])
 
     def glFinish(self, filename):
         with open(filename,"wb") as file:

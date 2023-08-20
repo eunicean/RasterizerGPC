@@ -18,8 +18,14 @@ rend.fragmentShader = shaders.distortionshader
 rend.glClearColor(0.5,0.5,0.7)
 rend.glClear()
 
-rend.glLoadModel(filename="model.obj",
-                 textureName= "model.bmp",
+# rend.glLoadModel(filename = "model.obj",
+#                  textureName = "model.bmp",
+#                  translate=(0,0,-5), 
+#                  rotate= (0,0,0),
+#                  scale=(1.5,1.5,1.5))
+
+rend.glLoadModel(filename = "PenguinBaseMesh.obj",
+                 textureName = "PenguinDiffuseColor1.bmp",
                  translate=(0,0,-5), 
                  rotate= (0,0,0),
                  scale=(1.5,1.5,1.5))
