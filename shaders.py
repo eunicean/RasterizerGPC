@@ -21,15 +21,48 @@ def vertexShader(vertex, **kwargs):
 
     return vt
 
+def fatShader(vertex, **kwargs):
+    modelMatrix = kwargs["modelMatrix"]
+    viewMatrix = kwargs["viewMatrix"]
+    projectionMatrix = kwargs["projectionMatrix"]
+    vpMatrix = kwargs["vpMatrix"]
+    normal = kwargs["normal"]
+
+    blowAmount = 0.05
+
+    vt = [vertex[0] + (normal[0]*blowAmount),
+          vertex[1] + (normal[1]*blowAmount),
+          vertex[2] + (normal[2]*blowAmount),
+          1]
+    
+    vt = metha.multiplyMatrixVector(vt,metha.multiplymatrix(metha.multiplymatrix(metha.multiplymatrix(vpMatrix,projectionMatrix),viewMatrix),modelMatrix))
+
+
+    vt = [vt[0]/vt[3],
+          vt[1]/vt[3],
+          vt[2]/vt[3]]
+
+    return vt
+
 def fragmentShader(**kwargs):
-    texCoords = kwargs["texCoords"]
+    tA,tB,tC = kwargs["texCoords"]
     texture = kwargs["texture"]
+    u,v,w = kwargs["bCoords"]
+
+    b = 1.0
+    g = 1.0
+    r = 1.0
 
     if texture != None:
-        color = texture.getColor(texCoords[0],texCoords[1])
-    else:
-        color =  (1,1,1)
-    return color
+        tU = u*tA[0] + v*tB[0] + w*tC[0]
+        tV = u*tA[1] + v*tB[1] + w*tC[1]
+
+        textureColor = texture.getColor(tU,tV)
+        b = textureColor[2]
+        g = textureColor[1]
+        r = textureColor[0]
+
+    return r,g,b
 
 def flatShader(**kwargs):
     dLight = kwargs["dLight"]
@@ -69,6 +102,7 @@ def gouradShader(**kwargs):
     tA,tB,tC = kwargs["texCoords"]
     texture = kwargs["texture"]
     u,v,w = kwargs["bCoords"]
+    modelMatrix = kwargs["modelMatrix"]
 
     b = 1.0
     g = 1.0
@@ -85,7 +119,11 @@ def gouradShader(**kwargs):
 
     normal = [u*nA[0] + v*nB[0] + w*nC[0],
               u*nA[1] + v*nB[1] + w*nC[1],
-              u*nA[2] + v*nB[2] + w*nC[2],]
+              u*nA[2] + v*nB[2] + w*nC[2],
+              0]
+    
+    normal = metha.multiplyMatrixVector(normal,modelMatrix)
+    normal = [normal[0], normal[1], normal[2]]
     
     dLight = list(dLight)
     for e in range(len(dLight)):
@@ -97,7 +135,10 @@ def gouradShader(**kwargs):
     g *= intensity
     r *= intensity
 
-    if intensity > 0:
+    if intensity > 0.0:
+        r = max(0.0, min(1.0, r))
+        g = max(0.0, min(1.0, g))
+        b = max(0.0, min(1.0, b))
         return r,g,b
     else:
         return (0,0,0)

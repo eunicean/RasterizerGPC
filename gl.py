@@ -43,9 +43,15 @@ class Model(object):
         self.translate = translate
         self.rotate = rotate
         self.scale = scale
+
+        self.SetShaders(None,None)
     
     def LoadTexture(self, textureName):
         self.texture = Texture(textureName)
+
+    def SetShaders(self, vertexShader, fragmentShader):
+        self.vertexShader = vertexShader
+        self.fragmentShader = fragmentShader
 
 class Renderer(object):
     def __init__(self, width,height):
@@ -57,6 +63,8 @@ class Renderer(object):
 
         self.glColor(1,1,1)
 
+        self.background = None
+
         self.objects = []
 
         self.vertexShader = None
@@ -67,12 +75,26 @@ class Renderer(object):
 
         self.activeTexture = None
 
+        self.activeModelMatrix = None
+
         self.glViewPort(0,0,self.width,self.height)
         self.glCamMatrix()
         self.glProjectionMatrix()
 
-        self.directionalLight = (0,1,-1) #apuntando hacia la derecha
+        self.directionalLight = (1,0,0) 
 
+    def glBackgroundTexture(self, filename):
+        self.background = Texture(filename)
+
+    def clearBackground(self):
+        self.glClear()
+        if self.background:
+            #para cada pixel del viewport
+            for x in range(self.vpX, self.vpX+self.vpWidth+1):
+                for y in range(self.vpY, self.vpY+self.vpHeight+1):
+                    texColor = self.background.getColor(u,v)
+                    if texColor:
+                        self.glPoint(x,y,color(texColor[0],texColor[1],texColor[2]))
 
     def glPrimitiveAssembly(self,tVerts, tTexCoords, tNormals):
         primitives = [ ]
@@ -201,7 +223,9 @@ class Renderer(object):
                                                                  texCoords = texCoordss,
                                                                  normals = normalss,
                                                                  dLight = self.directionalLight,
-                                                                 bCoords = bCoords)
+                                                                 bCoords = bCoords,
+                                                                 camMatrix = self.camMatrix,
+                                                                 modelMatrix = self.activeModelMatrix)
                                     
                                     self.glPoint(x,y,color(colorP[0],colorP[1],colorP[2]))
                                 else:
@@ -355,9 +379,7 @@ class Renderer(object):
                     
                 limit += 1
 
-    def glLoadModel(self, filename,textureName, translate = (0,0,0), rotate = (0,0,0), scale = (1,1,1)):
-        model = Model(filename,translate,rotate,scale)
-        model.LoadTexture(textureName)
+    def glAddModel(self, model):
         self.objects.append(model)
 
     def glRender(self):
@@ -366,8 +388,14 @@ class Renderer(object):
         normals = []
 
         for model in self.objects:
+            transformedVerts = []
+            texCoords = []
+            normals = []
+
+            self.vertexShader = model.vertexShader
+            self.fragmentShader = model.fragmentShader
             self.activeTexture = model.texture
-            mMat = self.glModelMatrix(model.translate,model.rotate, model.scale)
+            self.activeModelMatrix = self.glModelMatrix(model.translate,model.rotate, model.scale)
             for face in model.faces:
                 vertCount = len(face)
                 v0 = model.vertices[face[0][0]-1]
@@ -376,29 +404,47 @@ class Renderer(object):
 
                 if vertCount == 4:
                     v3 = model.vertices[face[3][0]-1]
+                
+                #Obtenemos las coordenadas de textura de la cara actual
+                vt0 = model.texcoords[face[0][1]-1]
+                vt1 = model.texcoords[face[1][1]-1]
+                vt2 = model.texcoords[face[2][1]-1]
+                if vertCount == 4:
+                    vt3 = model.texcoords[face[3][1]-1]
+
+                #obtenemos las normales
+                vn0 = model.normals[face[0][2]-1]
+                vn1 = model.normals[face[1][2]-1]
+                vn2 = model.normals[face[2][2]-1]
+                if vertCount == 4:
+                    vn3 = model.normals[face[3][2]-1]
 
                 if self.vertexShader:
                     v0 = self.vertexShader(v0, 
-                                           modelMatrix = mMat,
+                                           modelMatrix = self.activeModelMatrix,
                                            viewMatrix = self.viewMatrix,
                                            projectionMatrix = self.projectionMatrix,
-                                           vpMatrix = self.vpMatrix)
+                                           vpMatrix = self.vpMatrix,
+                                           normal = vn0)
                     v1 = self.vertexShader(v1, 
-                                           modelMatrix = mMat,
+                                           modelMatrix = self.activeModelMatrix,
                                            viewMatrix = self.viewMatrix,
                                            projectionMatrix = self.projectionMatrix,
-                                           vpMatrix = self.vpMatrix)
+                                           vpMatrix = self.vpMatrix,
+                                           normal = vn1)
                     v2 = self.vertexShader(v2, 
-                                           modelMatrix = mMat,
+                                           modelMatrix = self.activeModelMatrix,
                                            viewMatrix = self.viewMatrix,
                                            projectionMatrix = self.projectionMatrix,
-                                           vpMatrix = self.vpMatrix)
+                                           vpMatrix = self.vpMatrix,
+                                           normal = vn2)
                     if vertCount == 4:
                         v3 = self.vertexShader(v3, 
-                                           modelMatrix = mMat,
+                                           modelMatrix = self.activeModelMatrix,
                                            viewMatrix = self.viewMatrix,
                                            projectionMatrix = self.projectionMatrix,
-                                           vpMatrix = self.vpMatrix)
+                                           vpMatrix = self.vpMatrix,
+                                           normal = vn3)
                 
                 #agregar cada vertice transformado al listado de vertices
                 transformedVerts.append(v0)
@@ -409,12 +455,7 @@ class Renderer(object):
                     transformedVerts.append(v2)
                     transformedVerts.append(v3)
 
-                #Obtenemos las coordenadas de textura de la cara actual
-                vt0 = model.texcoords[face[0][1]-1]
-                vt1 = model.texcoords[face[1][1]-1]
-                vt2 = model.texcoords[face[2][1]-1]
-                if vertCount == 4:
-                    vt3 = model.texcoords[face[3][1]-1]
+                
                 #Agregamos las coordenadas de textura al listado de coordenadas de textura.
                 texCoords.append(vt0)
                 texCoords.append(vt1)
@@ -424,11 +465,7 @@ class Renderer(object):
                     texCoords.append(vt2)
                     texCoords.append(vt3)
 
-                vn0 = model.normals[face[0][2]-1]
-                vn1 = model.normals[face[1][2]-1]
-                vn2 = model.normals[face[2][2]-1]
-                if vertCount == 4:
-                    vn3 = model.normals[face[3][2]-1]
+                
 
                 normals.append(vn0)
                 normals.append(vn1)
@@ -438,11 +475,11 @@ class Renderer(object):
                     normals.append(vn2)
                     normals.append(vn3)
         
-        primitives = self.glPrimitiveAssembly(transformedVerts,texCoords, normals)
+            primitives = self.glPrimitiveAssembly(transformedVerts,texCoords, normals)
 
-        for prim in primitives:
-            if self.primitiveType == TRIANGLES:
-                self.glTriangle_bc(prim[0],prim[1],prim[2])
+            for prim in primitives:
+                if self.primitiveType == TRIANGLES:
+                    self.glTriangle_bc(prim[0],prim[1],prim[2])
 
     def glFinish(self, filename):
         with open(filename,"wb") as file:
