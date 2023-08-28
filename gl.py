@@ -81,17 +81,22 @@ class Renderer(object):
         self.glCamMatrix()
         self.glProjectionMatrix()
 
+        # self.directionalLight = (0,-2,-10) 
         self.directionalLight = (1,0,0) 
 
     def glBackgroundTexture(self, filename):
         self.background = Texture(filename)
 
-    def clearBackground(self):
+    def glclearBackground(self):
         self.glClear()
         if self.background:
             #para cada pixel del viewport
             for x in range(self.vpX, self.vpX+self.vpWidth+1):
                 for y in range(self.vpY, self.vpY+self.vpHeight+1):
+                    
+                    u = (x - self.vpX) / self.vpWidth
+                    v = (y - self.vpY) / self.vpHeight
+
                     texColor = self.background.getColor(u,v)
                     if texColor:
                         self.glPoint(x,y,color(texColor[0],texColor[1],texColor[2]))
@@ -232,10 +237,10 @@ class Renderer(object):
                                     self.glPoint(x,y,colorP)
 
     def glViewPort(self, x,y,width,height):
-        self.vpX = x
-        self.vpY = y
-        self.vpWidth = width
-        self.vpHeight = height
+        self.vpX = int(x)
+        self.vpY = int(y)
+        self.vpWidth = int(width)
+        self.vpHeight = int(height)
 
         self.vpMatrix = [[width/2,0,0,x+width/2],
                          [0,height/2,0,y+height/2],
