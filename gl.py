@@ -388,6 +388,7 @@ class Renderer(object):
         self.objects.append(model)
 
     def glRender(self):
+        print("Model")
         transformedVerts = []
         texCoords = []
         normals = []
